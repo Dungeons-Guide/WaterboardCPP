@@ -8,3 +8,5 @@ add_executable(waterboard main.cpp
         annealing.cpp
         simulation.h
         annealing.h)
+
+set(CMAKE_CXX_FLAGS_RELEASE "-O3")

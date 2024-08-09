@@ -33,7 +33,7 @@ int main() {
             " XXX XXXX XXXX XXX \n";
     
     uint8_t targets[] = {0, 4, 9, 14, 18};
-    bool targetActivate[] = {false, true, true, true,false};
+    bool targetActivate[] = {true, false, false, true,true};
 
     Node nodes[HEIGHT][WIDTH];
 
@@ -80,7 +80,21 @@ int main() {
             notTargets.push_back(Point{targets[i], HEIGHT - 1});
     }
 
-    std::vector<Action*> solution = anneal(nodes, ptTargets, notTargets, actions, &nullAction);
+    std::vector<Action*> currentActions;
+    for (int i = 0; i < 30; i++) {
+        currentActions.push_back(&nullAction);
+    }
+
+    std::vector<int> idxes;
+    size_t idx = currentActions.size();
+    for (Action* availableAction : actions) {
+        for (int j = 0; j < 3; j ++) {
+            currentActions.push_back(availableAction); // add 15 actions.
+            idxes.push_back(idx++);
+        }
+    }
+
+    std::vector<Action*> solution = anneal(nodes, ptTargets, notTargets, currentActions, idxes, 0.9999, 0.1, 2000);
 
     std::vector<Point> combinedTargets;
     combinedTargets.reserve(ptTargets.size() + notTargets.size());

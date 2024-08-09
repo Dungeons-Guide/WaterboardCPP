@@ -25,7 +25,10 @@ void generateNew(Action* action, Node nodes[HEIGHT][WIDTH], int flips[], std::ve
 std::vector<Action *> anneal(Node beginState[HEIGHT][WIDTH],
                              std::vector<Point>& targets,
                              std::vector<Point>& nonTargets,
-                             std::vector<Action*>& actions,
-                             Action* doNothing);
+                             std::vector<Action*>& currentActions,
+                             std::vector<int>& idxes,
+                             double tempMult,
+                             double targetTemp,
+                             int targetIteration);
 
 #endif //WATERBOARD_ANNEALING_H

@@ -65,8 +65,11 @@ void generateNew(Action* action, Node nodes[HEIGHT][WIDTH], int flips[], std::ve
 std::vector<Action *> anneal(Node beginState[HEIGHT][WIDTH],
                              std::vector<Point>& targets,
                              std::vector<Point>& nonTargets,
-                             std::vector<Action*>& actions,
-                             Action* doNothing) {
+                             std::vector<Action*>& currentActions,
+                             std::vector<int>& idxes,
+                             double tempMult,
+                             double targetTemp,
+                             int targetIteration) {
 
 
     std::uniform_real_distribution<double> unifDistribution(0,1);
@@ -83,25 +86,15 @@ std::vector<Action *> anneal(Node beginState[HEIGHT][WIDTH],
     }
 
 //    Action doNothing = Action {"nothing", std::vector<Point>(0), 1 };
-    std::vector<Action*> currentActions;
-    for (int i = 0; i < 30; i++) {
-        currentActions.push_back(doNothing);
-    }
 
-    std::vector<int> idxes;
-    size_t idx = currentActions.size();
-    for (Action* availableAction : actions) {
-        for (int j = 0; j < 3; j ++) {
-            currentActions.push_back(availableAction); // add 15 actions.
-            idxes.push_back(idx++);
-        }
-    }
 
     double lastEvaluation = INFINITY;
 
     double temperature = 2.3;
     int iteration = 0;
     int lastTarget = 0;
+
+    int lastUpdate = 0;
 
     double currentMinimum = 99999999;
     std::vector<Action*> currentMinimumActions;
@@ -213,13 +206,14 @@ std::vector<Action *> anneal(Node beginState[HEIGHT][WIDTH],
             auto duration = duration_cast<std::chrono::nanoseconds>(stop - start);
             std::cout << "Iteraiton took" <<  duration.count() << "nanoseconds" << std::endl;
         }
-        temperature *= 0.9999;
+        temperature *= tempMult;
 
         if (lastEvaluation > 10000 && temperature < 2.0) {
             temperature = 2.3; // :D
         }
 
         if (currentEvaluation <= currentMinimum) {
+            lastUpdate = iteration;
             currentMinimum = currentEvaluation;
 
             currentMinimumActions.clear();
@@ -228,7 +222,10 @@ std::vector<Action *> anneal(Node beginState[HEIGHT][WIDTH],
             }
         }
 
-        if (temperature < 0.05) {
+        if (temperature < targetTemp) {
+            return currentMinimumActions;
+        }
+        if (iteration - lastUpdate > targetIteration && lastEvaluation < 10000) {
             return currentMinimumActions;
         }
     }

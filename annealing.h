@@ -8,6 +8,7 @@
 #include "simulation.h"
 #include <map>
 #include <string>
+#include <vector>
 
 struct Point {
     uint8_t x;

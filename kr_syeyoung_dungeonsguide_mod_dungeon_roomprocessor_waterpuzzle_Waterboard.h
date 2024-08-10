@@ -13,7 +13,7 @@ extern "C" {
  * Signature: (DDI)[Lkr/syeyoung/dungeonsguide/mod/dungeon/roomprocessor/waterpuzzle/Waterboard/Action;
  */
 JNIEXPORT jobjectArray JNICALL Java_kr_syeyoung_dungeonsguide_mod_dungeon_roomprocessor_waterpuzzle_Waterboard_nativeSolve
-  (JNIEnv *, jobject, jdouble, jdouble, jint);
+  (JNIEnv *, jobject, jdouble, jdouble, jint, jint, jint, jint);
 
 #ifdef __cplusplus
 }

@@ -105,7 +105,7 @@ void JavaHashMapToStlActionList(JNIEnv *env, jobject hashMap, Action* lists, int
 
 
 JNIEXPORT jobjectArray JNICALL Java_kr_syeyoung_dungeonsguide_mod_dungeon_roomprocessor_waterpuzzle_Waterboard_nativeSolve
-    (JNIEnv *env, jobject obj, jdouble tempMult, jdouble targetTemp, jint targetIter) {
+    (JNIEnv *env, jobject obj, jdouble tempMult, jdouble targetTemp, jint targetIter, jint moves, jint cnt1, jint cnt2) {
     auto clazz = env->GetObjectClass(obj);
 
     auto board =  reinterpret_cast<jobjectArray>(env->GetObjectField(obj, env->GetFieldID(clazz, "currentState", "[[Lkr/syeyoung/dungeonsguide/mod/dungeon/roomprocessor/waterpuzzle/fallback/Simulator$Node;")));
@@ -167,6 +167,10 @@ JNIEXPORT jobjectArray JNICALL Java_kr_syeyoung_dungeonsguide_mod_dungeon_roompr
             jint y = env->GetIntField(point, env->GetFieldID(env->GetObjectClass(point), "y", "I"));
             ptTargets.push_back(Point {static_cast<uint8_t>(x), static_cast<uint8_t>(y)});
         }
+//        for (const auto &item: ptTargets) {
+//            std::cout << unsigned(item.x) << "," << unsigned(item.y) << " ";
+//        }
+//        std::cout << std::endl;
     }
     {
         int targetLen = env ->GetArrayLength(nonTarget);
@@ -176,6 +180,10 @@ JNIEXPORT jobjectArray JNICALL Java_kr_syeyoung_dungeonsguide_mod_dungeon_roompr
             jint y = env->GetIntField(point, env->GetFieldID(env->GetObjectClass(point), "y", "I"));
             notTargets.push_back(Point {static_cast<uint8_t>(x), static_cast<uint8_t>(y)});
         }
+//        for (const auto &item: notTargets) {
+//            std::cout << unsigned(item.x) << "," << unsigned(item.y) << " ";
+//        }
+//        std::cout << std::endl;
     }
 
 
@@ -189,22 +197,39 @@ JNIEXPORT jobjectArray JNICALL Java_kr_syeyoung_dungeonsguide_mod_dungeon_roompr
     actions.reserve(size);
     for (int i = 0; i < size; i++) {
         actions.push_back(list + i);
+        list[i].moves = moves;
     }
+
+//    for (const auto &item: actions) {
+//        std::cout << item->name << std::endl;
+//        for (const auto &item: item->flips) {
+//            std::cout << unsigned(item.x) << ", " << unsigned(item.y) <<  " ";
+//        }
+//        std::cout << std::endl;
+//    }
 
 
     std::vector<Action*> currentActions;
-    for (int i = 0; i < 30; i++) {
+    for (int i = 0; i < cnt1; i++) {
         currentActions.push_back(&nullAction);
     }
 
     std::vector<int> idxes;
     size_t idx = currentActions.size();
     for (Action* availableAction : actions) {
-        for (int j = 0; j < 3; j ++) {
+        for (int j = 0; j < cnt2; j ++) {
             currentActions.push_back(availableAction); // add 15 actions.
             idxes.push_back(idx++);
         }
     }
+
+//    for (const auto &item: currentActions) {
+//        std::cout << item->name << std::endl;
+//    }
+//    for (const auto &item: idxes) {
+//        std::cout << item << " ";
+//    }
+//    std::cout << std::endl;
 
     std::vector<Action*> solution = anneal(nodes, ptTargets, notTargets, currentActions, idxes, tempMult, targetTemp, targetIter);
 

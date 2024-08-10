@@ -74,6 +74,7 @@ std::vector<Action *> anneal(Node beginState[HEIGHT][WIDTH],
 
     std::uniform_real_distribution<double> unifDistribution(0,1);
     std::default_random_engine re;
+    std::mt19937 gen(re());
 
 
     std::vector<Point> combinedTargets;
@@ -106,8 +107,8 @@ std::vector<Action *> anneal(Node beginState[HEIGHT][WIDTH],
     while(true) {
         auto start = std::chrono::high_resolution_clock::now();
 
-        int swapX = actionDist(re) % currentActions.size();
-        int swapY = idxDist(re) % idxes.size();
+        int swapX = actionDist(gen) % currentActions.size();
+        int swapY = idxDist(gen) % idxes.size();
 
         if (std::find(idxes.begin(), idxes.end(), swapX) != idxes.end()) continue;
 
@@ -162,9 +163,19 @@ std::vector<Action *> anneal(Node beginState[HEIGHT][WIDTH],
 
             for (int i = 0; i < combinedTargets.size(); i++) {
                 if ((flips[i] % 2 == 1) != (i < targets.size())) {
-                    additionalPenalty += 20;
+                    additionalPenalty += 100;
                 }
             }
+
+//            int maxHeight = 0;
+//            for (int y = 0; y < HEIGHT; y++) {
+//                for (int x = 0; x < WIDTH; x++) {
+//                    if (begin[y][x].waterLevel == 0) {
+//                        maxHeight = y;
+//                    }
+//                }
+//            }
+//            additionalPenalty += HEIGHT - maxHeight;
 
         }
 
@@ -177,7 +188,7 @@ std::vector<Action *> anneal(Node beginState[HEIGHT][WIDTH],
             accepted = true;
             lastTarget = untilAction;
         } else {
-            if (unifDistribution(re) < exp(-variation / temperature)) {
+            if (unifDistribution(gen) < exp(-variation / temperature)) {
                 accepted = true;
             }
         }
@@ -193,10 +204,15 @@ std::vector<Action *> anneal(Node beginState[HEIGHT][WIDTH],
 
         iteration++;
         if (iteration % 1000 == 0) {
-            std::cout << iteration << "/" << lastEvaluation << "/" << temperature << "/" << chainLength << "/" << currentMinimum << "/" << lastTarget << std::endl;
+//            std::cout << iteration << "/" << lastEvaluation << "/" << temperature << "/" << chainLength << "/" << currentMinimum << "/" << lastTarget << std::endl;
             auto stop = std::chrono::high_resolution_clock::now();
             auto duration = duration_cast<std::chrono::nanoseconds>(stop - start);
-            std::cout << "This Iteration took" <<  duration.count() << "nanoseconds" << std::endl;
+//            std::cout << "This Iteration took" <<  duration.count() << "nanoseconds" << std::endl;
+
+//            for (const auto &item: currentActions) {
+//                std::cout << item->name << " ";
+//            }
+//            std::cout << std::endl;
         }
         temperature *= tempMult;
 
@@ -219,6 +235,9 @@ std::vector<Action *> anneal(Node beginState[HEIGHT][WIDTH],
         }
         if (iteration - lastUpdate > targetIteration && lastEvaluation < 10000) {
             return currentMinimumActions;
+        }
+        if (iteration > 10000 && lastEvaluation > 10000) {
+            return {}; // escape route
         }
     }
 }

@@ -11,48 +11,51 @@ int main() {
             "X     XXX X X      \n"
             "XXXXXXXXX XXXXXXXXX\n"
             "        X      XXXX\n"
-            "XX X X XXXXXX X XXX\n"
-            "   X X        X    \n"
-            " XX  XXXXX XXXXXXX \n"
-            " XX XXXXXX     XXX \n"
-            "           XXX XXX \n"
-            " XXXXXX XX XXX     \n"
-            "      X XX XXXXXXX \n"
-            "XXX X X XX         \n"
-            "    X X  XXXXXXXX X\n"
-            " XXXX XX X      X X\n"
-            "      XX X XXXXXX X\n"
-            "XXXXX XX X X      X\n"
-            "XX X     X X XXXXX \n"
-            "XX X XXX X X XXXXX \n"
-            "XX X XXX   X       \n"
-            "   X XXXX XXXX XXXX\n"
+            " X XXXXXXXXXXX XXXX\n"
+            " X X          XXXXX\n"
+            " XXXXXX XXXXXX XXXX\n"
+            " X      XX    X    \n"
+            "XX XXXXX X XX XXXX \n"
+            "XX XXXXX X XX XXXX \n"
+            "     X X   XX  XXX \n"
+            " XXXXXXXXXX XX XXX \n"
+            "   X XXXXXX        \n"
+            "XX X XXXXXXXXXXX X \n"
+            " X X XXXXXXXXXXX X \n"
+            " X X    X        X \n"
+            "XX XXXXXX XXXXXXXX \n"
+            "        X X    XXX \n"
+            " X XXX XXXXXXX     \n"
+            " X   X  X XXXX XXXX\n"
             " XXX XXXX XXXX XXX \n"
             " XXX XXXX XXXX XXX \n"
             "                   \n"
-            " XXX XXXX XXXX XXX \n";
+            " XXX XXXX XXXX XXX ";
     
     uint8_t targets[] = {0, 4, 9, 14, 18};
-    bool targetActivate[] = {true, false, false, true,true};
+    bool targetActivate[] = {false, true, false, true, true};
 
     Node nodes[HEIGHT][WIDTH];
 
     std::vector<Action*> actions;
 
-    Action g = {"mainStream", {Point { 9,0 }}, 3};
-    Action a = {"57:0", { Point { 2, 9 }, Point { 5, 16 }, Point { 10, 4 }, Point { 14, 20 }, Point { 15, 13 }}, 3};
-    Action b = {"41:0", { Point { 3, 12 }, Point { 4, 5 }, Point { 13, 5 }, Point { 18, 16 }}, 3};
-    Action c = {"155:0", { Point { 2, 16 }, Point { 6, 5 }, Point { 8, 4 }} , 3};
-    Action d = {"135:0", { Point { 2, 5 }, Point { 8, 18 }, Point { 10, 10 }, Point { 15, 4 }, Point { 16, 16 }, Point { 18, 20 }} , 3};
-//    Action e = {"5", {}, 3};
-//    Action f = {"6", {}, 3};
+    Action g = {"mainStream", {Point { 9,0 }}, 6};
+    Action a = {"173:0", { Point {1, 18}, Point {4, 5}, Point {9, 11}, Point {14, 20}, Point {18, 14} }, 6};
+    Action b = {"41:0", { Point {2, 7}, Point {7, 11}, Point {8, 4}, Point {8, 16}, Point {10, 18}, Point {14, 8}}, 6};
+    Action c = {"155:0", { Point {4, 12}, Point {10, 4}, Point {13, 13}, Point {15, 19}} , 6};
+    Action d = {"57:0", { Point {2, 9}, Point {3, 18}, Point {8, 18}, Point {12, 8}, Point {15, 13}} , 6};
+    Action e = {"133:0", {Point {1, 8}, Point {2, 19}, Point {5, 11}, Point {8, 8}, Point {8, 20}, Point {11, 11}, Point {14, 6}, Point {18, 20}}, 6};
+    Action f = {"172:0", {Point {3, 8}, Point {3, 11}, Point {9, 19}, Point {10, 16}, Point {13, 9}}, 6};
+
     Action nullAction = {"nothing", {}, 1};
 
-    actions.push_back(&g);
     actions.push_back(&a);
     actions.push_back(&b);
     actions.push_back(&c);
     actions.push_back(&d);
+    actions.push_back(&e);
+    actions.push_back(&f);
+    actions.push_back(&g);
 
     for (int y = 0; y < HEIGHT; y++) {
         for (int x = 0; x < WIDTH; x++) {
@@ -73,12 +76,17 @@ int main() {
 
     std::vector<Point> ptTargets;
     std::vector<Point> notTargets;
-    for (int i = 0; i < 5; i++) {
-        if (targetActivate[i])
-            ptTargets.push_back(Point{targets[i], HEIGHT - 1});
-        else
-            notTargets.push_back(Point{targets[i], HEIGHT - 1});
-    }
+//    for (int i = 0; i < 5; i++) {
+//        if (targetActivate[i])
+//            ptTargets.push_back(Point{targets[i], HEIGHT - 1});
+//        else
+//            notTargets.push_back(Point{targets[i], HEIGHT - 1});
+//    }
+    ptTargets.push_back(Point{18, 24});
+    ptTargets.push_back(Point{14, 24});
+    ptTargets.push_back(Point{4, 24});;
+    notTargets.push_back(Point{0, 24});;
+    notTargets.push_back(Point{9, 24});
 
     std::vector<Action*> currentActions;
     for (int i = 0; i < 30; i++) {
@@ -94,7 +102,7 @@ int main() {
         }
     }
 
-    std::vector<Action*> solution = anneal(nodes, ptTargets, notTargets, currentActions, idxes, 0.9999, 0.1, 2000);
+    std::vector<Action*> solution = anneal(nodes, ptTargets, notTargets, currentActions, idxes, 0.9999, 0.1, 10000);
 
     std::vector<Point> combinedTargets;
     combinedTargets.reserve(ptTargets.size() + notTargets.size());

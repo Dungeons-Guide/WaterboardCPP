@@ -8,8 +8,6 @@ set(CMAKE_CXX_STANDARD 17)
 
 #set(CMAKE_OSX_ARCHITECTURES "x86_64;arm64;armv7")
 set(JAVA_AWT_LIBRARY NotNeeded)
-set(JAVA_JVM_LIBRARY NotNeeded)
-set(JAVA_INCLUDE_PATH2 NotNeeded)
 set(JAVA_AWT_INCLUDE_PATH NotNeeded)
 
 find_package(JNI REQUIRED)

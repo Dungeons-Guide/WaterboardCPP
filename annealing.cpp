@@ -139,7 +139,6 @@ std::vector<Action *> anneal(Node beginState[HEIGHT][WIDTH],
         for (Action* currentAction : currentActions) {
             chainLength += currentAction->moves;
             untilAction += 1;
-//            std::cout << currentAction->name << " ";
             generateNew(currentAction, begin, flips, combinedTargets);
 
 
@@ -148,13 +147,6 @@ std::vector<Action *> anneal(Node beginState[HEIGHT][WIDTH],
                 break;
             }
         }
-//        std::cout << std::endl;
-//
-//        print(begin);
-//        for (int i = 0; i < 5; i++) {
-//            std::cout << flips[i] << " ";
-//        }
-//        std::cout << done << " ? " <<std::endl;
 
         double additionalPenalty = 0;
         if (done) {
@@ -204,7 +196,7 @@ std::vector<Action *> anneal(Node beginState[HEIGHT][WIDTH],
             std::cout << iteration << "/" << lastEvaluation << "/" << temperature << "/" << chainLength << "/" << currentMinimum << "/" << lastTarget << std::endl;
             auto stop = std::chrono::high_resolution_clock::now();
             auto duration = duration_cast<std::chrono::nanoseconds>(stop - start);
-            std::cout << "Iteraiton took" <<  duration.count() << "nanoseconds" << std::endl;
+            std::cout << "This Iteration took" <<  duration.count() << "nanoseconds" << std::endl;
         }
         temperature *= tempMult;
 

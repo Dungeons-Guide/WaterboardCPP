@@ -4,8 +4,10 @@
 
 #include "kr_syeyoung_dungeonsguide_mod_dungeon_roomprocessor_waterpuzzle_Waterboard.h"
 #include "annealing.h"
+#include <iostream>
 
-#define STR(x) #x
+#define STR2(x) #x
+#define STR(X) STR2(X)
 
 
 void JavaHashMapToStlActionList(JNIEnv *env, jobject hashMap, Action* lists, int size, int* actualSize) {
@@ -90,7 +92,6 @@ void JavaHashMapToStlActionList(JNIEnv *env, jobject hashMap, Action* lists, int
         lists[idx].moves = 3;
         lists[idx].flips = pointList;
 
-
         env->DeleteLocalRef(entry);
         env->ReleaseStringUTFChars(key, keyStr);
         env->DeleteLocalRef(key);
@@ -107,32 +108,34 @@ JNIEXPORT jobjectArray JNICALL Java_kr_syeyoung_dungeonsguide_mod_dungeon_roompr
     (JNIEnv *env, jobject obj, jdouble tempMult, jdouble targetTemp, jint targetIter) {
     auto clazz = env->GetObjectClass(obj);
 
-    auto board =  reinterpret_cast<jobjectArray>(env->GetObjectField(obj, env->GetFieldID(clazz, "currentState", "[[Lkr/syeyoung/dungeonsguide/mod/dungeon/roomprocessor/waterpuzzle/fallback/Simulator$Node")));
-    auto target =  reinterpret_cast<jobjectArray>(env->GetObjectField(obj, env->GetFieldID(clazz, "targets", "[Lkr/syeyoung/dungeonsguide/mod/dungeon/roomprocessor/waterpuzzle/fallback/Simulator$Pt")));
-    auto nonTarget =  reinterpret_cast<jobjectArray>(env->GetObjectField(obj, env->GetFieldID(clazz, "nonTargets", "[Lkr/syeyoung/dungeonsguide/mod/dungeon/roomprocessor/waterpuzzle/fallback/Simulator$Pt")));
-    auto flips = env->GetObjectField(obj, env->GetFieldID(clazz, "switchFlips", "Ljava/util/Map"));
+    auto board =  reinterpret_cast<jobjectArray>(env->GetObjectField(obj, env->GetFieldID(clazz, "currentState", "[[Lkr/syeyoung/dungeonsguide/mod/dungeon/roomprocessor/waterpuzzle/fallback/Simulator$Node;")));
+    auto target =  reinterpret_cast<jobjectArray>(env->GetObjectField(obj, env->GetFieldID(clazz, "targets", "[Lkr/syeyoung/dungeonsguide/mod/dungeon/roomprocessor/waterpuzzle/fallback/Simulator$Pt;")));
+    auto nonTarget =  reinterpret_cast<jobjectArray>(env->GetObjectField(obj, env->GetFieldID(clazz, "nonTargets", "[Lkr/syeyoung/dungeonsguide/mod/dungeon/roomprocessor/waterpuzzle/fallback/Simulator$Pt;")));
+    auto flips = env->GetObjectField(obj, env->GetFieldID(clazz, "switchFlips", "Ljava/util/Map;"));
 
-    Node nodes[HEIGHT][WIDTH];
+    Node nodes[HEIGHT][WIDTH] = {BLOCK, 0, false};
 
-    if (env ->GetArrayLength(board) != HEIGHT) {
-        env->ThrowNew(env->FindClass("java/lang/IllegalStateException"), "Board is not " STR(WIDTH) " by " STR(HEIGHT) " long");
+    int height= env ->GetArrayLength(board);
+    if (height > HEIGHT) {
+        env->ThrowNew(env->FindClass("java/lang/IllegalStateException"), "Board does not fit within " STR(WIDTH) " by " STR(HEIGHT));
         return nullptr;
     }
 
-    for (int y = 0; y < HEIGHT; y++) {
+    for (int y = 0; y < height; y++) {
         auto boardRow = reinterpret_cast<jobjectArray>(env->GetObjectArrayElement(board, y));
 
-        if (env ->GetArrayLength(boardRow) != WIDTH) {
-            env->ThrowNew(env->FindClass("java/lang/IllegalStateException"), "Board is not " STR(WIDTH) " by " STR(HEIGHT) " long");
+        int width = env ->GetArrayLength(boardRow);
+        if (width > WIDTH) {
+            env->ThrowNew(env->FindClass("java/lang/IllegalStateException"), "Board does not fit within " STR(WIDTH) " by " STR(HEIGHT));
             return nullptr;
         }
 
-        for (int x = 0; x < WIDTH; x++) {
+        for (int x = 0; x < width; x++) {
             jobject element = env->GetObjectArrayElement(boardRow, x);
 
             auto clazz = env->GetObjectClass(element);
             jint waterLevel = env->GetIntField(element, env->GetFieldID(clazz, "waterLevel", "I"));
-            jobject type = env->GetObjectField(element, env->GetFieldID(clazz, "nodeType", "Lkr/syeyoung/dungeonsguide/mod/dungeon/roomprocessor/waterpuzzle/fallback/Simulator$NodeType"));
+            jobject type = env->GetObjectField(element, env->GetFieldID(clazz, "nodeType", "Lkr/syeyoung/dungeonsguide/mod/dungeon/roomprocessor/waterpuzzle/fallback/Simulator$NodeType;"));
             jboolean update = env->GetBooleanField(element, env->GetFieldID(clazz, "update", "Z"));
 
             jint typeOrdinal = env->CallIntMethod(type, env->GetMethodID(env->GetObjectClass(type), "ordinal", "()I"));
@@ -151,6 +154,7 @@ JNIEXPORT jobjectArray JNICALL Java_kr_syeyoung_dungeonsguide_mod_dungeon_roompr
             }
         }
     }
+    print(nodes);
 
 
     std::vector<Point> ptTargets;
@@ -187,8 +191,8 @@ JNIEXPORT jobjectArray JNICALL Java_kr_syeyoung_dungeonsguide_mod_dungeon_roompr
         actions.push_back(list + i);
     }
 
+
     std::vector<Action*> currentActions;
-    currentActions.reserve(30 + actions.size() * 3);
     for (int i = 0; i < 30; i++) {
         currentActions.push_back(&nullAction);
     }
@@ -205,7 +209,7 @@ JNIEXPORT jobjectArray JNICALL Java_kr_syeyoung_dungeonsguide_mod_dungeon_roompr
     std::vector<Action*> solution = anneal(nodes, ptTargets, notTargets, currentActions, idxes, tempMult, targetTemp, targetIter);
 
 
-    jclass  actionClazz = env->FindClass("kr/syeyoung/dungeonsguide/mod/dungeon/roomprocessor/waterpuzzle/Waterboard/Action");
+    jclass  actionClazz = env->FindClass("kr/syeyoung/dungeonsguide/mod/dungeon/roomprocessor/waterpuzzle/Waterboard$Action");
     jobjectArray array = env->NewObjectArray(solution.size(), actionClazz, NULL);
 
     idx = 0;

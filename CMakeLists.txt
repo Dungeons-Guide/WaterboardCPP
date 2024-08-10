@@ -3,10 +3,22 @@ project(waterboard)
 
 set(CMAKE_CXX_STANDARD 17)
 
+find_package(JNI REQUIRED)
+include_directories(${JNI_INCLUDE_DIRS})
+
 add_executable(waterboard main.cpp
         simulation.cpp
         annealing.cpp
         simulation.h
         annealing.h)
+
+add_library(waterboard_lib
+        SHARED
+        simulation.cpp
+        annealing.cpp
+        simulation.h
+        annealing.h
+        kr_syeyoung_dungeonsguide_mod_dungeon_roomprocessor_waterpuzzle_Waterboard.h
+        waterpuzzle.cpp)
 
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")

@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <chrono>
+#include <algorithm>
 
 #include <random>
 
@@ -207,7 +208,7 @@ std::vector<Action *> anneal(Node beginState[HEIGHT][WIDTH],
         if (iteration % 1000 == 0) {
 //            std::cout << iteration << "/" << lastEvaluation << "/" << temperature << "/" << chainLength << "/" << currentMinimum << "/" << lastTarget << std::endl;
             auto stop = std::chrono::high_resolution_clock::now();
-            auto duration = duration_cast<std::chrono::nanoseconds>(stop - start);
+            auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(stop - start);
 //            std::cout << "This Iteration took" <<  duration.count() << "nanoseconds" << std::endl;
 
 //            for (const auto &item: currentActions) {
